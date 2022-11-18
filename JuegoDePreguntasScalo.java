@@ -1,9 +1,5 @@
 package Swing;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -15,107 +11,211 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
-    public class JuegoDePreguntasScalo extends JFrame {
+public class JuegoDePreguntasScalo {
         static String urlBD = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-NCF_82uIlZQL3idzK7-zjn6yCsPdkzTajfwcltScO_oayu65t89icjq5JXrlz0vx0WoYU18xVVl4/pub?output=tsv";
         static String textoBaseDePreguntas;
         static String[] renglones;
         static int cantidadDePreguntas;
         static String[][] baseDePreguntas;
+        static int cont;
+
+        static String imgPrincipal;
         String[] preguntaEscogida;
         String pregunta;
         String respuesta;
-        String img;
+        String imgJuego;
         ArrayList<String> Opciones = new ArrayList();
-        int n_pregunta = 0;
-        static int cont;
-        ActionListener oyenteDeAccion = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        };
-        private JButton jButton1;
-        private JButton jButton2;
-        private JButton jButton3;
-        private JButton jButton4;
-        private JLabel jLabel1;
-        private JLabel jLabel2;
-        private JPanel jPanel1;
-        private JPanel jPanel2;
-        private JPanel jPanel3;
+        ArrayList<Integer> preguntasDisponibles = new ArrayList();
+        Integer n_pregunta = 0;
+        private JPanel panelPrincipal1;
+        private JPanel panelPrincipal2;
+        private JPanel panelPrincipal3;
+        private JLabel tituloPrincipal;
+        private JButton botonIniciar;
+        private JButton botonSalir;
 
-        private void iniciarComponentes() {
-            this.jPanel1 = new JPanel();
-            this.jPanel2 = new JPanel();
-            this.jLabel1 = new JLabel();
-            this.jLabel2 = new JLabel();
-            this.jPanel3 = new JPanel();
-            this.jButton1 = new JButton();
-            this.jButton2 = new JButton();
-            this.jButton4 = new JButton();
-            this.jButton3 = new JButton();
-            this.setDefaultCloseOperation(3);
-            this.getContentPane().setLayout(new GridLayout());
-            this.jPanel1.setLayout(new GridLayout(2, 0));
-            this.jPanel2.setBackground(Color.cyan);
-            this.jPanel3.setBackground(Color.white);
-            this.jLabel1.setFont(new Font("Arial", 1, 20));
-            this.jLabel1.setText("Pregunta");
-            this.jPanel2.add(this.jLabel1);
-            this.jLabel2.setFont(new Font("Comic sans ms", 1, 20));
-            this.jLabel2.setText("Imagen");
-            this.jPanel2.add(this.jLabel2);
-            this.jPanel1.add(this.jPanel2);
-            this.jPanel3.setLayout(new GridLayout(0, 2, 30, 30));
-            this.jButton1.setFont(new Font("Comic sans ms", 2, 24));
-            this.jButton1.setText("Opcion 1");
-            this.jButton1.setBackground(Color.white);
-            this.jButton1.setFocusable(false);
-            this.jButton1.addActionListener(new ActionListener() {
+        private JFrame frame;
+        private JButton botonJuego1;
+        private JButton botonJuego2;
+        private JButton botonJuego3;
+        private JButton botonJuego4;
+        private JLabel labelJuego1;
+        private JLabel labelJuego2;
+        private JLabel labelJuegoLateral;
+        private JPanel panelJuego1;
+        private JPanel panelJuego2;
+        private JPanel panelJuego3;
+
+        private void botonIniciarActionPerformed(ActionEvent evt){
+            frame.remove(panelPrincipal1);
+            frame.remove(panelPrincipal2);
+            frame.remove(panelPrincipal3);
+
+            iniciarComponentesJuego();
+
+            cargarPreguntas();
+            this.jugar();
+        }
+
+        private void botonSalirActionPerformed(ActionEvent evt){
+        frame.dispose();
+    }
+
+    public void iniciarComponentesPrincipal() {
+        frame = new JFrame();
+        panelPrincipal1 = new JPanel();
+        panelPrincipal2 = new JPanel();
+        panelPrincipal3 = new JPanel();
+        tituloPrincipal = new JLabel();
+        botonIniciar = new JButton();
+        botonSalir = new JButton();
+
+        frame.setLayout(new BorderLayout());
+        frame.setTitle("Juegaso");
+
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(900, 600);
+        frame.setMinimumSize(new Dimension(700, 500));
+        frame.setLocationRelativeTo(null);
+
+        panelPrincipal1.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        panelPrincipal1.setBackground(Color.CYAN);
+
+        panelPrincipal2.setLayout(new BorderLayout(10, 0));
+        panelPrincipal2.setBackground(Color.CYAN);
+
+        panelPrincipal3.setLayout(new GridLayout(2, 1, 10, 5));
+        panelPrincipal3.setBackground(Color.CYAN);
+
+        tituloPrincipal.setText("<html><body>BIENVENDO AL JUEGO DE LA SCALONETA : <br/><p style='text-align:center;'>LE METEMOS???</p></body></html>");
+        tituloPrincipal.setFont(new Font("Comic sans ms", 0, 30));
+        tituloPrincipal.setHorizontalAlignment(SwingConstants.CENTER);
+        panelPrincipal1.add(tituloPrincipal);
+
+        JLabel gifCopa = null;
+        try {
+            ImageIcon gifImage = new ImageIcon(new URL(imgPrincipal));
+            gifCopa = new JLabel(gifImage);
+        } catch (Exception mue) {
+            gifCopa = new JLabel("Error al cargar la imagen");
+        } finally{
+            panelPrincipal2.add(gifCopa, BorderLayout.CENTER);
+        }
+        botonIniciar.setText("Empezar juego");
+        botonIniciar.setFont(new Font("Comic sans ms", 2, 24));
+        botonIniciar.setFocusable(false);
+        botonIniciar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                botonIniciarActionPerformed(evt);
+            }
+        });
+        panelPrincipal3.add(botonIniciar);
+
+        botonSalir.setText("Salir");
+        botonSalir.setFont(new Font("Comic sans ms", 2, 24));
+        botonSalir.setFocusable(false);
+        botonSalir.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                botonSalirActionPerformed(evt);
+            }
+        });
+        panelPrincipal3.add(botonSalir);
+
+
+        frame.add(panelPrincipal1, BorderLayout.NORTH);
+        frame.add(panelPrincipal2, BorderLayout.CENTER);
+        frame.add(panelPrincipal3, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+    }
+        private void iniciarComponentesJuego() {
+            this.panelJuego1 = new JPanel();
+            this.panelJuego2 = new JPanel();
+            this.panelJuego3 = new JPanel();
+            this.labelJuego1 = new JLabel();
+            this.labelJuego2 = new JLabel();
+            this.labelJuegoLateral = new JLabel();
+            this.botonJuego1 = new JButton();
+            this.botonJuego2 = new JButton();
+            this.botonJuego4 = new JButton();
+            this.botonJuego3 = new JButton();
+
+            frame.setLayout(new GridLayout());
+
+            this.panelJuego1.setLayout(new GridLayout(2, 0));
+            this.panelJuego2.setLayout(new BorderLayout(5, 5));
+
+            this.panelJuego2.setBackground(Color.cyan);
+            this.panelJuego3.setBackground(Color.white);
+            this.botonJuego1.setBackground(Color.white);
+            this.labelJuego1.setFont(new Font("Arial", 1, 20));
+            this.labelJuego1.setText("Pregunta");
+
+            this.labelJuego1.setHorizontalAlignment(SwingConstants.CENTER);
+            this.labelJuego2.setHorizontalAlignment(SwingConstants.CENTER);
+
+            this.labelJuegoLateral.setText("0/52");
+            this.labelJuegoLateral.setFont(new Font("Consolas", 0, 20));
+            this.panelJuego2.add(labelJuegoLateral, BorderLayout.EAST);
+
+            this.labelJuego2.setFont(new Font("Comic sans ms", 1, 20));
+            this.labelJuego2.setText("Imagen");
+            this.panelJuego2.add(this.labelJuego1, BorderLayout.NORTH);
+            this.panelJuego2.add(this.labelJuego2, BorderLayout.CENTER);
+            this.panelJuego1.add(this.panelJuego2);
+            this.panelJuego3.setLayout(new GridLayout(0, 2, 30, 30));
+            this.botonJuego1.setFont(new Font("Comic sans ms", 2, 24));
+            this.botonJuego1.setText("Opcion 1");
+            this.botonJuego1.setFocusable(false);
+
+            this.botonJuego1.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent evt) {
-                    JuegoDePreguntasScalo.this.jButton1ActionPerformed(evt);
+                    JuegoDePreguntasScalo.this.botonJuego1ActionPerformed(evt);
                 }
             });
-            this.jPanel3.add(this.jButton1);
-            this.jButton2.setFont(new Font("Comic sans ms", 2, 24));
-            this.jButton2.setText("Opcion 2");
-            this.jButton2.setBackground(Color.white);
-            this.jButton2.setFocusable(false);
-            this.jButton2.addActionListener(new ActionListener() {
+
+            this.panelJuego3.add(this.botonJuego1);
+            this.botonJuego2.setFont(new Font("Comic sans ms", 2, 24));
+            this.botonJuego2.setText("Opcion 2");
+            this.botonJuego2.setBackground(Color.white);
+            this.botonJuego2.setFocusable(false);
+
+            this.botonJuego2.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent evt) {
-                    JuegoDePreguntasScalo.this.jButton2ActionPerformed(evt);
+                    JuegoDePreguntasScalo.this.botonJuego2ActionPerformed(evt);
                 }
             });
-            this.jPanel3.add(this.jButton2);
-            this.jButton4.setFont(new Font("Comic sans ms", 2, 24));
-            this.jButton4.setText("Opcion 3");
-            this.jButton4.setBackground(Color.cyan);
-            this.jButton4.setFocusable(false);
-            this.jButton4.addActionListener(new ActionListener() {
+
+            this.panelJuego3.add(this.botonJuego2);
+            this.botonJuego4.setFont(new Font("Comic sans ms", 2, 24));
+            this.botonJuego4.setText("Opcion 3");
+            this.botonJuego4.setBackground(Color.cyan);
+            this.botonJuego4.setFocusable(false);
+
+            this.botonJuego4.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent evt) {
-                    JuegoDePreguntasScalo.this.jButton4ActionPerformed(evt);
+                    JuegoDePreguntasScalo.this.botonJuego4ActionPerformed(evt);
                 }
             });
-            this.jPanel3.add(this.jButton4);
-            this.jButton3.setFont(new Font("Comic sans ms", 2, 24));
-            this.jButton3.setText("Opcion 4");
-            this.jButton3.setBackground(Color.cyan);
-            this.jButton3.setFocusable(false);
-            this.jButton3.addActionListener(new ActionListener() {
+
+            this.panelJuego3.add(this.botonJuego4);
+            this.botonJuego3.setFont(new Font("Comic sans ms", 2, 24));
+            this.botonJuego3.setText("Opcion 4");
+            this.botonJuego3.setBackground(Color.cyan);
+            this.botonJuego3.setFocusable(false);
+
+            this.botonJuego3.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent evt) {
-                    JuegoDePreguntasScalo.this.jButton3ActionPerformed(evt);
+                    JuegoDePreguntasScalo.this.botonJuego3ActionPerformed(evt);
                 }
             });
-            this.jPanel3.add(this.jButton3);
-            this.jPanel1.add(this.jPanel3);
-            this.getContentPane().add(this.jPanel1);
-            this.pack();
+
+            this.panelJuego3.add(this.botonJuego3);
+            this.panelJuego1.add(this.panelJuego3);
+            frame.add(this.panelJuego1);
+            //frame.pack();
         }
 
         public void escogerPregunta(int n) {
@@ -123,9 +223,9 @@ import javax.swing.JPanel;
             this.pregunta = this.preguntaEscogida[0];
             this.respuesta = this.preguntaEscogida[1];
             if (this.preguntaEscogida.length > 5) {
-                this.img = this.preguntaEscogida[5];
+                this.imgJuego = this.preguntaEscogida[5];
             } else {
-                this.img = "";
+                this.imgJuego = "";
             }
 
             this.Opciones.clear();
@@ -142,36 +242,36 @@ import javax.swing.JPanel;
         }
 
         public void mostrarPregunta() {
-            this.jLabel1.setText(this.pregunta);
-            if (this.img.equals("")) {
-                this.jLabel2.setVisible(false);
+            this.labelJuego1.setText(this.pregunta);
+            if (this.imgJuego.equals("")) {
+                this.labelJuego2.setVisible(false);
             } else {
-                this.jLabel2.setVisible(true);
-                this.jLabel2.setText("");
+                this.labelJuego2.setVisible(true);
+                this.labelJuego2.setText("");
 
                 try {
-                    BufferedImage imagen = ImageIO.read(new URL(this.img));
+                    BufferedImage imagen = ImageIO.read(new URL(this.imgJuego));
                     Image imagenEscalada = imagen.getScaledInstance(-350, 350, 1);
-                    this.jLabel2.setIcon(new ImageIcon(imagenEscalada));
+                    this.labelJuego2.setIcon(new ImageIcon(imagenEscalada));
                 } catch (Exception var3) {
-                    this.jLabel2.setText("La imagen no se pudo cargar");
-                    this.jLabel2.setIcon((Icon)null);
+                    this.labelJuego2.setText("La imagen no se pudo cargar");
+                    this.labelJuego2.setIcon((Icon)null);
                 }
             }
 
-            this.jButton1.setText((String)this.Opciones.get(0));
-            this.jButton2.setText((String)this.Opciones.get(1));
-            this.jButton4.setText((String)this.Opciones.get(2));
-            this.jButton3.setText((String)this.Opciones.get(3));
+            this.labelJuegoLateral.setText((n_pregunta+1) + "/52");
+            this.botonJuego1.setText((String)this.Opciones.get(0));
+            this.botonJuego2.setText((String)this.Opciones.get(1));
+            this.botonJuego4.setText((String)this.Opciones.get(2));
+            this.botonJuego3.setText((String)this.Opciones.get(3));
         }
 
         void escogerRespuesta(int n) {
             if (((String)this.Opciones.get(n)).equals(this.respuesta)) {
-                JOptionPane.showMessageDialog(this, "Su respuesta es correcta", "Muy bien :)", 1);
-                JOptionPane.showMessageDialog(this, "Sumaste un punto", "golazooo", 1);
+                JOptionPane.showMessageDialog(frame, "Su respuesta es correcta. Sumaste un punto", "Muy bien :)", 1);
                 ++cont;
             } else {
-                JOptionPane.showMessageDialog(this, "Su respuesta es incorrecta, la respuesta es: " + this.respuesta, "Que mal :(", 0);
+                JOptionPane.showMessageDialog(frame, "Su respuesta es incorrecta, la respuesta es: " + this.respuesta, "Que mal :(", 0);
             }
             
             System.out.println("la cantidad de puntos es: " + cont);
@@ -179,13 +279,21 @@ import javax.swing.JPanel;
             this.jugar();
         }
 
+        public void cargarPreguntas(){
+            for (int i = 0; i< cantidadDePreguntas; i++){
+                preguntasDisponibles.add(i);
+            }
+
+            Collections.shuffle(preguntasDisponibles);
+        }
+
         public void jugar() {
-            if (this.n_pregunta == cantidadDePreguntas) {
-                JOptionPane.showMessageDialog(this, "Juego Terminado", "Muy bien :)", -1);
+            if (n_pregunta == cantidadDePreguntas) {
+                JOptionPane.showMessageDialog(frame, "Juego Terminado. *Puntaje Total* " +cont, "Muy bien :)", -1);
                 System.exit(0);
             }
 
-            this.escogerPregunta(this.n_pregunta);
+            this.escogerPregunta(this.preguntasDisponibles.get(n_pregunta));
             this.mostrarPregunta();
             ++this.n_pregunta;
         }
@@ -196,13 +304,7 @@ import javax.swing.JPanel;
                 baseDePreguntas[i] = renglon.split("\t");
             }
 
-            this.iniciarComponentes();
-            this.setSize(750, 600);
-            this.setLocationRelativeTo((Component)null);
-            this.setDefaultCloseOperation(3);
-            this.setVisible(true);
-            this.setTitle("El Juego de la Scaloneta");
-            this.jugar();
+            this.iniciarComponentesPrincipal();
         }
 
         public static String LeerArchivo(String ruta) {
@@ -240,19 +342,19 @@ import javax.swing.JPanel;
             return texto;
         }
 
-        private void jButton1ActionPerformed(ActionEvent evt) {
+        private void botonJuego1ActionPerformed(ActionEvent evt) {
             this.escogerRespuesta(0);
         }
 
-        private void jButton2ActionPerformed(ActionEvent evt) {
+        private void botonJuego2ActionPerformed(ActionEvent evt) {
             this.escogerRespuesta(1);
         }
 
-        private void jButton4ActionPerformed(ActionEvent evt) {
+        private void botonJuego4ActionPerformed(ActionEvent evt) {
             this.escogerRespuesta(2);
         }
 
-        private void jButton3ActionPerformed(ActionEvent evt) {
+        private void botonJuego3ActionPerformed(ActionEvent evt) {
             this.escogerRespuesta(3);
         }
 
@@ -266,5 +368,6 @@ import javax.swing.JPanel;
             cantidadDePreguntas = renglones.length;
             baseDePreguntas = new String[cantidadDePreguntas][renglones.length];
             cont = 0;
+            imgPrincipal = "https://i.imgur.com/nzoV1N9.gif";
         }
     }
