@@ -268,13 +268,11 @@ public class JuegoDePreguntasScalo {
 
         void escogerRespuesta(int n) {
             if (((String)this.Opciones.get(n)).equals(this.respuesta)) {
-                JOptionPane.showMessageDialog(frame, "Su respuesta es correcta. Sumaste un punto", "Muy bien :)", 1);
                 ++cont;
+                JOptionPane.showMessageDialog(frame, "Su respuesta es correcta. Puntos: " + cont, "Muy bien :)", 1);
             } else {
-                JOptionPane.showMessageDialog(frame, "Su respuesta es incorrecta, la respuesta es: " + this.respuesta, "Que mal :(", 0);
+                JOptionPane.showMessageDialog(frame, "Su respuesta es incorrecta, la respuesta es: " + this.respuesta + ". Puntos: " + cont, "Que mal :(", 0);
             }
-            
-            System.out.println("la cantidad de puntos es: " + cont);
 
             this.jugar();
         }
